@@ -1,6 +1,45 @@
 #!/bin/bash
+
 if [[ "$KAFKAS" == '' ]]; then
     echo 'KAFKAS env var not set'
     exit 1
 fi
 
+# topic list
+# topic create hithere
+# topic delete hithere
+# topic write hithere
+#   key
+#   value
+#   ^D
+# topic read hithere
+
+operation="$1"
+topic="$2"
+
+set -x
+case "$operation" in
+    list | ls)
+        kafka-topics.sh --bootstrap-server $KAFKAS --list
+        ;;
+
+    create | add | mk | new)
+        kafka-topics.sh --bootstrap-server $KAFKAS --create --topic "$topic" --partitions 3 --replication-factor 3
+        ;;
+
+    delete | remove | rm | del)
+        kafka-topics.sh --bootstrap-server $KAFKAS --delete --topic "$topic"
+        ;;
+
+    write)
+        kafka-topics.sh --bootstrap-server $KAFKAS --list
+        ;;
+
+    read)
+        kafka-topics.sh --bootstrap-server $KAFKAS --list
+        ;;
+
+    *)
+        ;;
+
+esac
