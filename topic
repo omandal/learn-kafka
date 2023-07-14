@@ -31,6 +31,10 @@ case "$operation" in
         kafka-topics.sh --bootstrap-server $KAFKAS --delete --topic "$topic"
         ;;
 
+    describe | desc | show )
+        kafka-topics.sh --bootstrap-server $KAFKAS --describe --topic "$topic"
+        ;;
+
     write)
         kafka-topics.sh --bootstrap-server $KAFKAS --list
         ;;
