@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ "$KAFKAS" == '' ]]; then
+    echo 'KAFKAS env var not set'
+    exit 1
+fi
+
