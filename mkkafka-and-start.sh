@@ -9,8 +9,11 @@ main() {
     mktemplate
     mkmachines
     start_zookeeper
-    configure_kafka_hosts
-    start_kafka_servers
+    kafka_hostadd ks1 0
+    kafka_hostadd ks2 1
+    kafka_hostadd ks3 2
+
+    docker run --network kafka -itd --name work -h work kafka bash
 }
 
 delete_all() {
@@ -62,15 +65,10 @@ EOF
     docker rm -f work
 }
 
-mkmachines() {
-    docker run --network kafka -itd --name zooker -h zooker kafka bash
-    docker run --network kafka -itd --name ks1 -h ks1 kafka bash
-    docker run --network kafka -itd --name ks2 -h ks2 kafka bash
-    docker run --network kafka -itd --name ks3 -h ks3 kafka bash
-    docker run --network kafka -itd --name work -h work kafka bash
-}
-
 start_zookeeper() {
+
+    docker run --network kafka -itd --name zooker -h zooker kafka bash
+
     # start zookeeper
     cat <<'EOF' | docker exec -i zooker su - om -c bash -
 sudo mkdir -p /opt/kafka/logs
@@ -80,51 +78,31 @@ tmux new-session -s zook -d '/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka
 EOF
 }
 
-configure_kafka_hosts() {
-    for host in ks1 ks2 ks3; do
-        cat <<'EOF' | docker exec -i $host su - om -c bash -
+kafka_hostadd() {
+    local hostname="$1"
+    local brokerid="$2"
+    docker rm -f $hostname
+    docker run --network kafka -itd --name $hostname -h $hostname kafka bash
+
+    cat <<'EOF' | sed 's/__BROKER_ID__/'"$brokerid"'/' | docker exec -i $hostname su - om -c bash -
 sudo mkdir -p /opt/kafka/logs
 sudo chown -R om:om /opt/kafka/logs
+
 rm -rf ~/kinaction
 mkdir ~/kinaction
+
 cd ~/kinaction
 egrep -v '^broker.id=|^zookeeper.connect=|^log.dirs=' </opt/kafka/config/server.properties >server.properties
-EOF
-    done
-
-    cat <<'EOF' | docker exec -i ks1 su - om -c bash -
-cat <<'_EOF' >>~/kinaction/server.properties
-broker.id=0
+cat <<'_EOF' >>server.properties
+broker.id=__BROKER_ID__
 zookeeper.connect=zooker:2181
 log.dirs=/home/om/kinaction/kafka-logs
 _EOF
-EOF
 
-    cat <<'EOF' | docker exec -i ks2 su - om -c bash -
-cat <<'_EOF' >>~/kinaction/server.properties
-broker.id=1
-zookeeper.connect=zooker:2181
-log.dirs=/home/om/kinaction/kafka-logs
-_EOF
-EOF
-
-    cat <<'EOF' | docker exec -i ks3 su - om -c bash -
-cat <<'_EOF' >>~/kinaction/server.properties
-broker.id=2
-zookeeper.connect=zooker:2181
-log.dirs=/home/om/kinaction/kafka-logs
-_EOF
-EOF
-
-}
-
-start_kafka_servers() {
-    for server in ks1 ks2 ks3; do
-        cat <<'EOF' | docker exec -i $server su - om -c bash -
-cd ~/kinaction
 tmux new-session -s kafka -d '/opt/kafka/bin/kafka-server-start.sh ./server.properties'
+
 EOF
-    done
+
 }
 
 main
