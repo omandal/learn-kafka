@@ -7,7 +7,7 @@ main() {
     delete_all
     mknetwork
     mktemplate
-    start_zookeeper
+    mkzooker
     kafka_hostadd ks1 0
     kafka_hostadd ks2 1
     kafka_hostadd ks3 2
@@ -64,8 +64,9 @@ EOF
     docker rm -f work
 }
 
-start_zookeeper() {
+mkzooker() {
 
+    docker rm -f zooker >/dev/null 2>&1
     docker run --network kafka -itd --name zooker -h zooker kafka bash
 
     # start zookeeper
@@ -80,7 +81,7 @@ EOF
 kafka_hostadd() {
     local hostname="$1"
     local brokerid="$2"
-    docker rm -f $hostname
+    docker rm -f $hostname >/dev/null 2>&1
     docker run --network kafka -itd --name $hostname -h $hostname kafka bash
 
     cat <<'EOF' | sed 's/__BROKER_ID__/'"$brokerid"'/' | docker exec -i $hostname su - om -c bash -
