@@ -13,6 +13,22 @@ main() {
     kafka_hostadd ks3 2
 
     docker run --network kafka -itd --name work -h work kafka bash
+    (
+    cd
+    tar cfz __a.tgz .ssh
+    docker cp __a.tgz work:/home/om/a.tgz
+    rm -f __a.tgz
+    )
+    cat <<'EOF' | docker exec -i zooker su - om -c bash -
+cd
+sudo chown om:om a.tgz
+tat xfz a.tgz
+rm -f a.tgz
+
+mkdir sb
+cd sb
+git clone git@github.com:omandal/learn-kafka.git
+EOF
 }
 
 delete_all() {
