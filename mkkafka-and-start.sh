@@ -19,16 +19,19 @@ main() {
     docker cp __a.tgz work:/home/om/a.tgz
     rm -f __a.tgz
     )
-    cat <<'EOF' | docker exec -i zooker su - om -c bash -
+    cat <<'EOF' | docker exec -i work su - om -c bash -
 cd
 sudo chown om:om a.tgz
-tat xfz a.tgz
+tar xfz a.tgz
 rm -f a.tgz
 
 mkdir sb
 cd sb
 git clone git@github.com:omandal/learn-kafka.git
 EOF
+    echo
+    echo
+    echo 'docker exec -it work su - om'
 }
 
 delete_all() {
