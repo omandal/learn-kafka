@@ -7,7 +7,6 @@ main() {
     delete_all
     mknetwork
     mktemplate
-    mkmachines
     start_zookeeper
     kafka_hostadd ks1 0
     kafka_hostadd ks2 1
