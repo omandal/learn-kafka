@@ -36,11 +36,11 @@ case "$operation" in
         ;;
 
     write)
-        kafka-topics.sh --bootstrap-server $KAFKAS --list
+        kafka-console-producer.sh --bootstrap-server $KAFKAS --topic $topic
         ;;
 
     read)
-        kafka-topics.sh --bootstrap-server $KAFKAS --list
+        kafka-console-consumer.sh --bootstrap-server $KAFKAS --topic $topic --from-beginning --property print.timestamp=true
         ;;
 
     *)
